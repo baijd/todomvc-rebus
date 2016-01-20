@@ -1,11 +1,14 @@
 var React = require('react');
 	Rebus = require('../utils/Rebus.js');
 
+//组件FileName
+var _FILE = 'TodoApp.react.js';
+
 var TodoApp = React.createClass({
 	render : function(){
-		var TodoHead = Rebus.do('GET_TODOHEAD'),
-			TodoBody = Rebus.do('GET_TODOBODY'),
-			TodoFoot = Rebus.do('GET_TODOFOOT');
+		var TodoHead = Rebus.execute({akey:'GET_TODOHEAD',from:_FILE}),
+			TodoBody = Rebus.execute({akey:'GET_TODOBODY',from:_FILE}),
+			TodoFoot = Rebus.execute({akey:'GET_TODOFOOT',from:_FILE});
 		return (
 			<div>
 				{TodoHead}

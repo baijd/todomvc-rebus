@@ -1,15 +1,14 @@
 var React = require('react'),
 	Rebus = require('../utils/Rebus.js'),
-	classNames = require('classnames'),
-	Contants = require('../utils/Contants.js');
+	classNames = require('classnames');
 
-//组件ID
-var _compID = Contants.TODO_FILTER;
+//组件FileName
+var _FILE = 'TodoFilter.react.js';
 
 //组件状态生成函数
 var _createState = function(){
 	return {
-		filter : Rebus.do('GET_FILTER'),
+		filter : Rebus.execute({akey:'GET_FILTER',from:_FILE}),
 	}
 };
 
@@ -24,11 +23,11 @@ module.exports = React.createClass({
 		return _createState();
 	},
 	componentDidMount : function(){
-		Rebus.addStoreListener(['filter'], function(){
-			this.setState(_createState);
-		}.bind(this));
+		this.updateTodoFilter.hookey = 'updateTodoFilter';
+		Rebus.addStoreListener(['filter'], this.updateTodoFilter);
 	},
 	componentWillUnmount : function(){
+		Rebus.removeStoreListener(['filter'], this.updateTodoFilter);
 	},
 	render : function(){
 		return (
@@ -52,7 +51,10 @@ module.exports = React.createClass({
 		return links;
 	},//End filterLinks
 	handleClick : function(filter){
-		Rebus.do('UPDATE_FILTER', filter);
+		Rebus.execute({akey:'UPDATE_FILTER',from:_FILE}, filter);
 	},
+	updateTodoFilter : function(){
+		this.setState(_createState);
+	}
 	
 });

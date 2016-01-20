@@ -1,16 +1,15 @@
 var React = require('react'),
 	ReactPropTypes = React.PropTypes,
-	Rebus = require('../utils/Rebus.js'),
-	contants = require('../utils/Contants.js');
+	Rebus = require('../utils/Rebus.js');
 
-//该组件的ID
-var _compID = contants.TODO_BODY;
+//组件FileName
+var _FILE = 'TodoBody.react.js';
 
 //组件State生成器
 var _createState = function(){
 	return {
-		todos : ( Rebus.do('GET_TODOS') || {} ),
-		areAllComplete : ( Rebus.do('ARE_ALL_COMPLETE') || false ),
+		todos : ( Rebus.execute({akey:'GET_TODOS',from:_FILE}) || {} ),
+		areAllComplete : ( Rebus.execute({akey:'ARE_ALL_COMPLETE',from:_FILE}) || false ),
 	}
 }//End getTodoState
 
@@ -21,25 +20,20 @@ var TodoBody = React.createClass({
 	},//End getInitialState
 
 	componentDidMount : function(){
-		var self = this;
-		function updateTodoBody(){
-			self.setState(_createState);
-		}
-		Rebus.addStoreListener(['todos','filter'], updateTodoBody);
+		this.updateTodoBody.hookey = 'updateTodoBody';
+		Rebus.addStoreListener(['todos','filter'], this.updateTodoBody);
 	},//End componentDidMount
 
 	componentWillUnmount : function(){
-		Rebus.removeUpdateListener(_compID);
+		Rebus.removeStoreListener(['todos','filter'], this.updateTodoBody);
 	},//End componentWillUnmount
 
 	render : function(){
 		var todos = this.state.todos,
-			todoItems = [];
+			todoItems = [],
+			actionHead= {akey:'GET_TODOITEM',from:_FILE};
 		for(var key in todos){
-			todoItems.push( Rebus.do('GET_TODOITEM', {
-				key : key,
-				todo : todos[key],
-			}) );
+			todoItems.push( Rebus.execute(actionHead,{key:key,todo:todos[key]}) );
 		}
 		return (
 			<section id='main'>
@@ -53,8 +47,12 @@ var TodoBody = React.createClass({
 	},//End render
 
 	onToggleCompleteAll : function(){
-		Rebus.do('TOGGLE_ALL_COMPLETE');
+		Rebus.execute({akey:'TOGGLE_ALL_COMPLETE',from:_FILE});
 	},//End onToggleCompleteAll
+
+	updateTodoBody : function(){
+		this.setState(_createState);
+	},//End updateTodoBody
 
 });
 

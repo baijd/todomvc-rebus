@@ -2,7 +2,8 @@ var React = require('react'),
 	ReactPropTypes = React.PropTypes,
 	Rebus = require('../utils/Rebus.js');
 
-var ENTER_KEY_CODE = 13;
+var _FILE = 'TodoInput.react.js',
+	ENTER_KEY_CODE = 13;
 
 var TodoInput = React.createClass({
 
@@ -29,7 +30,6 @@ var TodoInput = React.createClass({
 				autoFocus={true}
 				value={this.state.value}
 				onChange={this.onChange}
-				onBlur={this.onBlur}
 				onKeyDown={this.onKeyDown} />
 		);
 	},
@@ -40,10 +40,6 @@ var TodoInput = React.createClass({
 		});
 	},
 
-	onBlur : function(){
-		this.state.onSave(this.state.value);
-	},
-
 	onKeyDown : function(event){
 		if(ENTER_KEY_CODE === event.keyCode){
 			this.state.onSave(this.state.value);
@@ -51,7 +47,7 @@ var TodoInput = React.createClass({
 	},
 
 	onSave : function(text){
-		Rebus.do('ADD_TODO', {text:text});
+		Rebus.execute({akey:'ADD_TODO',from:_FILE}, {text:text});
 		this.setState({value : ''});
 	},
 });

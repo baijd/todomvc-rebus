@@ -1,14 +1,13 @@
 var React = require('react'),
-	Rebus = require('../utils/Rebus.js'),
-	Contants = require('../utils/Contants.js');
+	Rebus = require('../utils/Rebus.js');
 
-//组件ID
-var _compID = Contants.TODO_FOOT;
+//组件FileName
+var _FILE = 'TodoFoot.react.js';
 
 //组件状态生成函数
 var _createState = function(){
 	return {
-		allTodos : Rebus.do('GET_ALL_TODOS'),
+		allTodos : Rebus.execute({akey:'GET_ALL_TODOS',from:_FILE}),
 	};
 };
 
@@ -17,11 +16,11 @@ var TodoFoot = React.createClass({
 		return _createState();
 	},
 	componentDidMount : function(){
-		Rebus.addStoreListener(['todos'], function(){
-			this.setState(_createState);
-		}.bind(this));
+		this.updateTodoFoot.hookey = 'updateTodoFoot';
+		Rebus.addStoreListener(['todos'], this.updateTodoFoot);
 	},
 	componentWillUnmount : function(){
+		Rebus.removeStoreListener(['todos'], this.updateTodoFoot);
 	},
 	render : function(){
 		var allTodos = this.state.allTodos;
@@ -62,11 +61,11 @@ var TodoFoot = React.createClass({
 			</footer>
 		);
 	},
-	updateState : function(){
-		this.setState(_createState);
-	},
 	onClearCompleteClick : function(){
 		Rebus.do('CLEAR_COMPLETED');
+	},
+	updateTodoFoot : function(){
+		this.setState(_createState);
 	},
 });
 

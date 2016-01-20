@@ -113,8 +113,8 @@ function setFilter(filter){
 	Rebus.setStore('filter',_filter);
 }//End setFilter
 
-function log(){
-	console.log(arguments);
+function logAddAction(){
+	console.log('You have added a new Todo item: '+arguments[1].text);
 }
 
 module.exports = {
@@ -129,5 +129,5 @@ module.exports = {
 	getTodosByFilter	: getTodosByFilter,
 	getFilter 			: getFilter,
 	setFilter			: setFilter,
-	log					: log,
+	logAddAction		: logAddAction,
 };

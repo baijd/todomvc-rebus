@@ -9,7 +9,7 @@ Rebus.initStore(store);
 require('./rebusFile.js');
 
 // 3. create the root component by Rebus.
-var app = Rebus.do('GET_TODOAPP');
+var app = Rebus.execute({akey:'GET_TODOAPP',from:'app.js'});
 ReactDOM.render(
 	app,
 	document.getElementById('todoapp')

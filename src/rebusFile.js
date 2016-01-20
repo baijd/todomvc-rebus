@@ -25,11 +25,11 @@ Rebus.connect('GET_TODOS', TodoService.getTodosByFilter);
 
 Rebus.connect('GET_FILTER', TodoService.getFilter);
 
-Rebus.connect('ADD_TODO', TodoService.add).and([TodoService.log]);
+Rebus.connect('ADD_TODO', TodoService.add).and([TodoService.logAddAction]);
 
 Rebus.connect('DESTROY_TODO', TodoService.remove);
 
-Rebus.connect('UPDATE_TODO', TodoService.update).and([TodoService.log]);
+Rebus.connect('UPDATE_TODO', TodoService.update);
 
 Rebus.connect('TOGGLE_COMPLETE', TodoService.toggleComplete);
 

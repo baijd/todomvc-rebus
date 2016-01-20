@@ -3,6 +3,8 @@ var React = require('react'),
 	classNames = require('classnames'),
 	Rebus = require('../utils/Rebus.js');
 
+var _FILE = 'TodoItem.react.js';
+
 var TodoItem = React.createClass({
 
 	propTypes : {
@@ -21,7 +23,7 @@ var TodoItem = React.createClass({
 
 		var input;
 		if(this.state.isEditing){
-			input = Rebus.do('GET_TODOINPUT', 
+			input = Rebus.execute({akey:'GET_TODOINPUT',from:_FILE}, 
 				{className:'edit', onSave:this.onUpdate, value:todo.text} );
 		}
 
@@ -54,7 +56,7 @@ var TodoItem = React.createClass({
 	},//End render()
 
 	onToggleComplete : function(){
-		Rebus.do('TOGGLE_COMPLETE', this.props.todo);
+		Rebus.execute({akey:'TOGGLE_COMPLETE',from:_FILE}, this.props.todo);
 	},//End onToggleComplete()
 
 	onDoubleClick : function(event){
@@ -62,12 +64,12 @@ var TodoItem = React.createClass({
 	},//End onDoubleClick()
 
 	onDestroyClick : function(){
-		Rebus.do('DESTROY_TODO', this.props.todo.id);
+		Rebus.execute({akey:'DESTROY_TODO',from:_FILE}, this.props.todo.id);
 	},//End _onDestoryClick()
 
 	onUpdate : function(text){
 		if(text.trim()!=''){
-			Rebus.do('UPDATE_TODO',this.props.todo.id, {text:text});
+			Rebus.execute({akey:'UPDATE_TODO',from:_FILE},this.props.todo.id, {text:text});
 		}
 		this.setState({isEditing:false});
 	},//End onUpdate()

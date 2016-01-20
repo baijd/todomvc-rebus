@@ -2,52 +2,60 @@ var _store = {},
 	_hookMap = {},
 	_actionMap = {};
 
+//Config of Rebus
 var _config = {
-	printArgu : false,
-	showHooks : true
+	showHooks : true,
+	showAction: true,
 }
 
-//Debug Functions
-var _debug = {
-	showHooks : function(){}
+//Debug Tools
+var _tools = {
+	showHooks : _config.showHooks ? _showHooks : function(){},
+	showAction: _config.showAction ? _showAction : function(){},
 }
 
-function init(){
-	if(_config.showHooks){
-		_debug.showHooks = function(key,hooks){
-			console.log({
-				storeKey : key,
-				hooks 	 : hooks
-			});
-		}
-	}
+function _showHooks(key,hooks){
+	var str = '[HookMap]'+key+'-->';
+	for(var i in hooks){ str += hooks[i].hookey+'/'; }
+	console.log(str);
 }
 
-//init the Rebus
-init();
+function _showAction(){
+	console.log(arguments);
+}
 
 module.exports = {
-
-	do:function(){
-		var actionKey = Array.prototype.shift.call(arguments),
-			fns = _actionMap[actionKey],
+	execute : function(){
+		var actionHead = Array.prototype.shift.call(arguments),
+			akey = actionHead['akey'],
+			from = actionHead['from'],
+			fns  = _actionMap[akey],
 			result = null,
 			self = this;
 
-		if(!(fns instanceof Array))
-			return;
+		//打印调试信息
+		_tools.showAction(akey,from,arguments);
 
+		//fns的长度等于0，则该action还没对应的实现方法。
+		if(0===fns.length){
+			console.error('Error: There is no implement function connected to this Action.');
+			return null;
+		}
+
+		//fns的第一个函数是通过connect方法绑定进来的，是该action的实现方法，可能由返回值，将返回值保存在result。
 		result = fns[0].apply(self, arguments);
 
+		//执行fns中的其它函数，即通过and方法绑定进来的其它函数，这些函数调试工具，也可能是其它关心这个action的service。
+		Array.prototype.unshift.call(arguments,actionHead);
 		for(var i=1,len=fns.length; i<len; i++){
 			if(fns[i] instanceof Function){
-				Array.prototype.unshift.call(arguments,actionKey);
 				fns[i].apply(self,arguments);
 			}else{
 				console.error("Error: "+fns[i]+" is not a function.");
 			}
 		}
 
+		//返回fns[0]的执行结果，不管这个action是否需要同步返回值，返回就是。
 		return result;
 	},
 
@@ -63,11 +71,9 @@ module.exports = {
 	},
 
 	and : function(fns){
-		var actionKey = this.actionKey;
+		var akey = this.actionKey;
 		if(fns instanceof Array){
-			for(var i in fns){
-				_actionMap[actionKey].push(fns[i]);
-			}
+			_actionMap[akey] = _actionMap[akey].concat(fns);
 		}else{
 			console.error("Error: The argument for and() must be an array of Function.");
 		}
@@ -115,7 +121,6 @@ module.exports = {
 			hooks[i]();
 		}
 		//3.debug
-		_debug.showHooks(key,hooks);
+		_tools.showHooks(key,hooks);
 	},
-
 };

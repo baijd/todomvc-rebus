@@ -19146,11 +19146,14 @@ module.exports = require('./lib/React');
 var React = require('react');
 	Rebus = require('../utils/Rebus.js');
 
+//组件FileName
+var _FILE = 'TodoApp.react.js';
+
 var TodoApp = React.createClass({displayName: "TodoApp",
 	render : function(){
-		var TodoHead = Rebus.do('GET_TODOHEAD'),
-			TodoBody = Rebus.do('GET_TODOBODY'),
-			TodoFoot = Rebus.do('GET_TODOFOOT');
+		var TodoHead = Rebus.execute({akey:'GET_TODOHEAD',from:_FILE}),
+			TodoBody = Rebus.execute({akey:'GET_TODOBODY',from:_FILE}),
+			TodoFoot = Rebus.execute({akey:'GET_TODOFOOT',from:_FILE});
 		return (
 			React.createElement("div", null, 
 				TodoHead, 
@@ -19166,17 +19169,16 @@ module.exports = TodoApp;
 },{"../utils/Rebus.js":175,"react":161}],163:[function(require,module,exports){
 var React = require('react'),
 	ReactPropTypes = React.PropTypes,
-	Rebus = require('../utils/Rebus.js'),
-	contants = require('../utils/Contants.js');
+	Rebus = require('../utils/Rebus.js');
 
-//该组件的ID
-var _compID = contants.TODO_BODY;
+//组件FileName
+var _FILE = 'TodoBody.react.js';
 
 //组件State生成器
 var _createState = function(){
 	return {
-		todos : ( Rebus.do('GET_TODOS') || {} ),
-		areAllComplete : ( Rebus.do('ARE_ALL_COMPLETE') || false ),
+		todos : ( Rebus.execute({akey:'GET_TODOS',from:_FILE}) || {} ),
+		areAllComplete : ( Rebus.execute({akey:'ARE_ALL_COMPLETE',from:_FILE}) || false ),
 	}
 }//End getTodoState
 
@@ -19187,25 +19189,20 @@ var TodoBody = React.createClass({displayName: "TodoBody",
 	},//End getInitialState
 
 	componentDidMount : function(){
-		var self = this;
-		function updateTodoBody(){
-			self.setState(_createState);
-		}
-		Rebus.addStoreListener(['todos','filter'], updateTodoBody);
+		this.updateTodoBody.hookey = 'updateTodoBody';
+		Rebus.addStoreListener(['todos','filter'], this.updateTodoBody);
 	},//End componentDidMount
 
 	componentWillUnmount : function(){
-		Rebus.removeUpdateListener(_compID);
+		Rebus.removeStoreListener(['todos','filter'], this.updateTodoBody);
 	},//End componentWillUnmount
 
 	render : function(){
 		var todos = this.state.todos,
-			todoItems = [];
+			todoItems = [],
+			actionHead= {akey:'GET_TODOITEM',from:_FILE};
 		for(var key in todos){
-			todoItems.push( Rebus.do('GET_TODOITEM', {
-				key : key,
-				todo : todos[key],
-			}) );
+			todoItems.push( Rebus.execute(actionHead,{key:key,todo:todos[key]}) );
 		}
 		return (
 			React.createElement("section", {id: "main"}, 
@@ -19219,26 +19216,29 @@ var TodoBody = React.createClass({displayName: "TodoBody",
 	},//End render
 
 	onToggleCompleteAll : function(){
-		Rebus.do('TOGGLE_ALL_COMPLETE');
+		Rebus.execute({akey:'TOGGLE_ALL_COMPLETE',from:_FILE});
 	},//End onToggleCompleteAll
+
+	updateTodoBody : function(){
+		this.setState(_createState);
+	},//End updateTodoBody
 
 });
 
 module.exports = TodoBody;
 
-},{"../utils/Contants.js":174,"../utils/Rebus.js":175,"react":161}],164:[function(require,module,exports){
+},{"../utils/Rebus.js":175,"react":161}],164:[function(require,module,exports){
 var React = require('react'),
 	Rebus = require('../utils/Rebus.js'),
-	classNames = require('classnames'),
-	Contants = require('../utils/Contants.js');
+	classNames = require('classnames');
 
-//组件ID
-var _compID = Contants.TODO_FILTER;
+//组件FileName
+var _FILE = 'TodoFilter.react.js';
 
 //组件状态生成函数
 var _createState = function(){
 	return {
-		filter : Rebus.do('GET_FILTER'),
+		filter : Rebus.execute({akey:'GET_FILTER',from:_FILE}),
 	}
 };
 
@@ -19253,11 +19253,11 @@ module.exports = React.createClass({displayName: "exports",
 		return _createState();
 	},
 	componentDidMount : function(){
-		Rebus.addStoreListener(['filter'], function(){
-			this.setState(_createState);
-		}.bind(this));
+		this.updateTodoFilter.hookey = 'updateTodoFilter';
+		Rebus.addStoreListener(['filter'], this.updateTodoFilter);
 	},
 	componentWillUnmount : function(){
+		Rebus.removeStoreListener(['filter'], this.updateTodoFilter);
 	},
 	render : function(){
 		return (
@@ -19281,23 +19281,25 @@ module.exports = React.createClass({displayName: "exports",
 		return links;
 	},//End filterLinks
 	handleClick : function(filter){
-		Rebus.do('UPDATE_FILTER', filter);
+		Rebus.execute({akey:'UPDATE_FILTER',from:_FILE}, filter);
 	},
+	updateTodoFilter : function(){
+		this.setState(_createState);
+	}
 	
 });
 
-},{"../utils/Contants.js":174,"../utils/Rebus.js":175,"classnames":1,"react":161}],165:[function(require,module,exports){
+},{"../utils/Rebus.js":175,"classnames":1,"react":161}],165:[function(require,module,exports){
 var React = require('react'),
-	Rebus = require('../utils/Rebus.js'),
-	Contants = require('../utils/Contants.js');
+	Rebus = require('../utils/Rebus.js');
 
-//组件ID
-var _compID = Contants.TODO_FOOT;
+//组件FileName
+var _FILE = 'TodoFoot.react.js';
 
 //组件状态生成函数
 var _createState = function(){
 	return {
-		allTodos : Rebus.do('GET_ALL_TODOS'),
+		allTodos : Rebus.execute({akey:'GET_ALL_TODOS',from:_FILE}),
 	};
 };
 
@@ -19306,11 +19308,11 @@ var TodoFoot = React.createClass({displayName: "TodoFoot",
 		return _createState();
 	},
 	componentDidMount : function(){
-		Rebus.addStoreListener(['todos'], function(){
-			this.setState(_createState);
-		}.bind(this));
+		this.updateTodoFoot.hookey = 'updateTodoFoot';
+		Rebus.addStoreListener(['todos'], this.updateTodoFoot);
 	},
 	componentWillUnmount : function(){
+		Rebus.removeStoreListener(['todos'], this.updateTodoFoot);
 	},
 	render : function(){
 		var allTodos = this.state.allTodos;
@@ -19351,19 +19353,21 @@ var TodoFoot = React.createClass({displayName: "TodoFoot",
 			)
 		);
 	},
-	updateState : function(){
-		this.setState(_createState);
-	},
 	onClearCompleteClick : function(){
 		Rebus.do('CLEAR_COMPLETED');
+	},
+	updateTodoFoot : function(){
+		this.setState(_createState);
 	},
 });
 
 module.exports = TodoFoot;
 
-},{"../utils/Contants.js":174,"../utils/Rebus.js":175,"react":161}],166:[function(require,module,exports){
+},{"../utils/Rebus.js":175,"react":161}],166:[function(require,module,exports){
 var React = require('react'),
 	Rebus = require('../utils/Rebus.js');
+
+var _FILE = 'TodoHead.react.js';
 
 var TodoHead = React.createClass({displayName: "TodoHead",
 	render : function(){
@@ -19372,7 +19376,7 @@ var TodoHead = React.createClass({displayName: "TodoHead",
 				id:'new-todo',
 				placeholder:'What needs to be done?',
 			};
-		var TodoInput = Rebus.do("GET_TODOINPUT", props);
+		var TodoInput = Rebus.execute({akey:"GET_TODOINPUT",from:_FILE}, props);
 		return (
 			React.createElement("header", {id: "header"}, 
 				React.createElement("h1", null, "todos"), 
@@ -19390,7 +19394,8 @@ var React = require('react'),
 	ReactPropTypes = React.PropTypes,
 	Rebus = require('../utils/Rebus.js');
 
-var ENTER_KEY_CODE = 13;
+var _FILE = 'TodoInput.react.js',
+	ENTER_KEY_CODE = 13;
 
 var TodoInput = React.createClass({displayName: "TodoInput",
 
@@ -19417,7 +19422,6 @@ var TodoInput = React.createClass({displayName: "TodoInput",
 				autoFocus: true, 
 				value: this.state.value, 
 				onChange: this.onChange, 
-				onBlur: this.onBlur, 
 				onKeyDown: this.onKeyDown})
 		);
 	},
@@ -19428,10 +19432,6 @@ var TodoInput = React.createClass({displayName: "TodoInput",
 		});
 	},
 
-	onBlur : function(){
-		this.state.onSave(this.state.value);
-	},
-
 	onKeyDown : function(event){
 		if(ENTER_KEY_CODE === event.keyCode){
 			this.state.onSave(this.state.value);
@@ -19439,7 +19439,7 @@ var TodoInput = React.createClass({displayName: "TodoInput",
 	},
 
 	onSave : function(text){
-		Rebus.do('ADD_TODO', {text:text});
+		Rebus.execute({akey:'ADD_TODO',from:_FILE}, {text:text});
 		this.setState({value : ''});
 	},
 });
@@ -19451,6 +19451,8 @@ var React = require('react'),
 	ReactPropTypes = React.PropTypes,
 	classNames = require('classnames'),
 	Rebus = require('../utils/Rebus.js');
+
+var _FILE = 'TodoItem.react.js';
 
 var TodoItem = React.createClass({displayName: "TodoItem",
 
@@ -19470,7 +19472,7 @@ var TodoItem = React.createClass({displayName: "TodoItem",
 
 		var input;
 		if(this.state.isEditing){
-			input = Rebus.do('GET_TODOINPUT', 
+			input = Rebus.execute({akey:'GET_TODOINPUT',from:_FILE}, 
 				{className:'edit', onSave:this.onUpdate, value:todo.text} );
 		}
 
@@ -19503,7 +19505,7 @@ var TodoItem = React.createClass({displayName: "TodoItem",
 	},//End render()
 
 	onToggleComplete : function(){
-		Rebus.do('TOGGLE_COMPLETE', this.props.todo);
+		Rebus.execute({akey:'TOGGLE_COMPLETE',from:_FILE}, this.props.todo);
 	},//End onToggleComplete()
 
 	onDoubleClick : function(event){
@@ -19511,12 +19513,12 @@ var TodoItem = React.createClass({displayName: "TodoItem",
 	},//End onDoubleClick()
 
 	onDestroyClick : function(){
-		Rebus.do('DESTROY_TODO', this.props.todo.id);
+		Rebus.execute({akey:'DESTROY_TODO',from:_FILE}, this.props.todo.id);
 	},//End _onDestoryClick()
 
 	onUpdate : function(text){
 		if(text.trim()!=''){
-			Rebus.do('UPDATE_TODO',this.props.todo.id, {text:text});
+			Rebus.execute({akey:'UPDATE_TODO',from:_FILE},this.props.todo.id, {text:text});
 		}
 		this.setState({isEditing:false});
 	},//End onUpdate()
@@ -19537,7 +19539,7 @@ Rebus.initStore(store);
 require('./rebusFile.js');
 
 // 3. create the root component by Rebus.
-var app = Rebus.do('GET_TODOAPP');
+var app = Rebus.execute({akey:'GET_TODOAPP',from:'app.js'});
 ReactDOM.render(
 	app,
 	document.getElementById('todoapp')
@@ -19571,11 +19573,11 @@ Rebus.connect('GET_TODOS', TodoService.getTodosByFilter);
 
 Rebus.connect('GET_FILTER', TodoService.getFilter);
 
-Rebus.connect('ADD_TODO', TodoService.add).and([TodoService.log]);
+Rebus.connect('ADD_TODO', TodoService.add).and([TodoService.logAddAction]);
 
 Rebus.connect('DESTROY_TODO', TodoService.remove);
 
-Rebus.connect('UPDATE_TODO', TodoService.update).and([TodoService.log]);
+Rebus.connect('UPDATE_TODO', TodoService.update);
 
 Rebus.connect('TOGGLE_COMPLETE', TodoService.toggleComplete);
 
@@ -19750,8 +19752,8 @@ function setFilter(filter){
 	Rebus.setStore('filter',_filter);
 }//End setFilter
 
-function log(){
-	console.log(arguments);
+function logAddAction(){
+	console.log('You have added a new Todo item: '+arguments[1].text);
 }
 
 module.exports = {
@@ -19766,7 +19768,7 @@ module.exports = {
 	getTodosByFilter	: getTodosByFilter,
 	getFilter 			: getFilter,
 	setFilter			: setFilter,
-	log					: log,
+	logAddAction		: logAddAction,
 };
 
 },{"../utils/Rebus.js":175,"object-assign":4}],173:[function(require,module,exports){
@@ -19793,52 +19795,60 @@ var _store = {},
 	_hookMap = {},
 	_actionMap = {};
 
+//Config of Rebus
 var _config = {
-	printArgu : false,
-	showHooks : true
+	showHooks : true,
+	showAction: true,
 }
 
-//Debug Functions
-var _debug = {
-	showHooks : function(){}
+//Debug Tools
+var _tools = {
+	showHooks : _config.showHooks ? _showHooks : function(){},
+	showAction: _config.showAction ? _showAction : function(){},
 }
 
-function init(){
-	if(_config.showHooks){
-		_debug.showHooks = function(key,hooks){
-			console.log({
-				storeKey : key,
-				hooks 	 : hooks
-			});
-		}
-	}
+function _showHooks(key,hooks){
+	var str = '[HookMap]'+key+'-->';
+	for(var i in hooks){ str += hooks[i].hookey+'/'; }
+	console.log(str);
 }
 
-//init the Rebus
-init();
+function _showAction(){
+	console.log(arguments);
+}
 
 module.exports = {
-
-	do:function(){
-		var actionKey = Array.prototype.shift.call(arguments),
-			fns = _actionMap[actionKey],
+	execute : function(){
+		var actionHead = Array.prototype.shift.call(arguments),
+			akey = actionHead['akey'],
+			from = actionHead['from'],
+			fns  = _actionMap[akey],
 			result = null,
 			self = this;
 
-		if(!(fns instanceof Array))
-			return;
+		//打印调试信息
+		_tools.showAction(akey,from,arguments);
 
+		//fns的长度等于0，则该action还没对应的实现方法。
+		if(0===fns.length){
+			console.error('Error: There is no implement function connected to this Action.');
+			return null;
+		}
+
+		//fns的第一个函数是通过connect方法绑定进来的，是该action的实现方法，可能由返回值，将返回值保存在result。
 		result = fns[0].apply(self, arguments);
 
+		//执行fns中的其它函数，即通过and方法绑定进来的其它函数，这些函数调试工具，也可能是其它关心这个action的service。
+		Array.prototype.unshift.call(arguments,actionHead);
 		for(var i=1,len=fns.length; i<len; i++){
 			if(fns[i] instanceof Function){
-				Array.prototype.unshift.call(arguments,actionKey);
 				fns[i].apply(self,arguments);
 			}else{
 				console.error("Error: "+fns[i]+" is not a function.");
 			}
 		}
 
+		//返回fns[0]的执行结果，不管这个action是否需要同步返回值，返回就是。
 		return result;
 	},
 
@@ -19854,11 +19864,9 @@ module.exports = {
 	},
 
 	and : function(fns){
-		var actionKey = this.actionKey;
+		var akey = this.actionKey;
 		if(fns instanceof Array){
-			for(var i in fns){
-				_actionMap[actionKey].push(fns[i]);
-			}
+			_actionMap[akey] = _actionMap[akey].concat(fns);
 		}else{
 			console.error("Error: The argument for and() must be an array of Function.");
 		}
@@ -19906,10 +19914,8 @@ module.exports = {
 			hooks[i]();
 		}
 		//3.debug
-		_debug.showHooks(key,hooks);
+		_tools.showHooks(key,hooks);
 	},
-
 };
-
 
 },{}]},{},[169])
