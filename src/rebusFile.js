@@ -15,7 +15,7 @@ Rebus.connect('GET_TODOITEM', CompFactory.createTodoItem);
 
 Rebus.connect('GET_TODOFOOT', CompFactory.createTodoFoot);
 
-Rebus.connect('GET_TODOFILTER', CompFactory.createTodoFilter);
+Rebus.connect('GET_TODOFILTER_COMP', CompFactory.createTodoFilter);
 
 Rebus.connect('ARE_ALL_COMPLETE', TodoService.areAllComplete);
 

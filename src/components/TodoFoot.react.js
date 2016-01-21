@@ -48,6 +48,8 @@ var TodoFoot = React.createClass({
 					Clear completed ({completed})
 				</button>;
 		}
+
+		var filterComp = Rebus.execute({akey:'GET_TODOFILTER_COMP',from:_FILE});
 		return (
 			<footer id='footer'>
 				<span id='todo-count'>
@@ -56,13 +58,13 @@ var TodoFoot = React.createClass({
 					</strong>		
 					{itemsLeftPhrase}
 				</span>
-				{Rebus.do('GET_TODOFILTER')}
+				{filterComp}
 				{clearCompletedButton}
 			</footer>
 		);
 	},
 	onClearCompleteClick : function(){
-		Rebus.do('CLEAR_COMPLETED');
+		Rebus.execute({akey:'CLEAR_COMPLETED',from:_FILE});
 	},
 	updateTodoFoot : function(){
 		this.setState(_createState);
