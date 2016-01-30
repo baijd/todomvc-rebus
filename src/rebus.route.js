@@ -1,19 +1,20 @@
 var Rebus = require('./utils/Rebus.js'),
 	CompFactory = require('./services/Comp.factory.js'),
 	TodoService = require('./services/Todo.service.js'),
+	TodoLog  = require('./services/Todo.log.js'),
 	Contants = require('./utils/Contants.js');
 
 Rebus.connect('GET_TODOAPP', CompFactory.createTodoApp);
 
 Rebus.connect('GET_TODOHEAD', CompFactory.createTodoHead);
 
-Rebus.connect('GET_TODOINPUT', CompFactory.createTodoInput);
-
 Rebus.connect('GET_TODOBODY', CompFactory.createTodoBody);
 
-Rebus.connect('GET_TODOITEM', CompFactory.createTodoItem);
-
 Rebus.connect('GET_TODOFOOT', CompFactory.createTodoFoot);
+
+Rebus.connect('GET_TODOINPUT', CompFactory.createTodoInput);
+
+Rebus.connect('GET_TODOITEM', CompFactory.createTodoItem);
 
 Rebus.connect('GET_TODOFILTER_COMP', CompFactory.createTodoFilter);
 
@@ -25,7 +26,7 @@ Rebus.connect('GET_TODOS', TodoService.getTodosByFilter);
 
 Rebus.connect('GET_FILTER', TodoService.getFilter);
 
-Rebus.connect('ADD_TODO', TodoService.add).and([TodoService.logAddAction]);
+Rebus.connect('ADD_TODO', TodoService.add).and([TodoLog.logAddTodo]);
 
 Rebus.connect('DESTROY_TODO', TodoService.remove);
 

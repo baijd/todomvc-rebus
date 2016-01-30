@@ -1,22 +1,25 @@
-var _store = {},
+var assign = require('object-assign');
+
+var _stateTree = {},
 	_hookMap = {},
 	_actionMap = {};
 
 //Config of Rebus
 var _config = {
-	showHooks : true,
-	showAction: true,
+	showListener : false,
+	showAction: false,
 }
 
 //Debug Tools
 var _tools = {
-	showHooks : _config.showHooks ? _showHooks : function(){},
-	showAction: _config.showAction ? _showAction : function(){},
+	showListener: function(){},
+	showAction 	: function(){},
 }
 
-function _showHooks(key,hooks){
-	var str = '[HookMap]'+key+'-->';
-	for(var i in hooks){ str += hooks[i].hookey+'/'; }
+function _showListener(key){
+	var str = '[Listeners]: '+key+'-->',
+		hooks = _hookMap[key];
+	for(var i in hooks){ str += hooks[i].listener+'/'; }
 	console.log(str);
 }
 
@@ -25,6 +28,37 @@ function _showAction(){
 }
 
 module.exports = {
+	initConfig: function(config){
+		_config = assign({}, _config, config);
+		_tools.showListener = _config.showListener ? _showListener : function(){};
+		_tools.showAction= _config.showAction ? _showAction : function(){};
+	},
+
+	initState : function(stateTree){
+		_stateTree = stateTree;
+	},
+
+	getState : function(key){
+		if(key){
+			return _stateTree[key];
+		}else{
+			return _stateTree;
+		}
+	},
+
+	//更新某个State
+	setState : function(key, val){
+		//1.更新state的值
+		_stateTree[key] = val;
+		//2.触发监听该state的组件钩子函数
+		var hooks = _hookMap[key];
+		for(var i=0,len=hooks.length; i<len; i++){
+			hooks[i]();
+		}
+		//3.debug
+		_tools.showListener(key);
+	},
+
 	execute : function(){
 		var actionHead = Array.prototype.shift.call(arguments),
 			akey = actionHead['akey'],
@@ -37,8 +71,8 @@ module.exports = {
 		_tools.showAction(akey,from,arguments);
 
 		//fns的长度等于0，则该action还没对应的实现方法。
-		if(0===fns.length){
-			console.error('Error: There is no implement function connected to this Action.');
+		if(undefined===fns || 0===fns.length){
+			console.error('Error: There is no roote for this Action:'+akey+" from "+from);
 			return null;
 		}
 
@@ -79,48 +113,43 @@ module.exports = {
 		}
 	},
 
-	addStoreListener : function(storeKeys,hook){
-		var fns;//某个store变化时，要执行的组件更新方法（钩子函数）
-		for(var i in storeKeys){
-			fns = _hookMap[storeKeys[i]] || [];
+	addStateListener : function(stateKeys,hook){
+		var fns;//某个state变化时，要执行的组件更新方法（钩子函数）
+		for(var i in stateKeys){
+			fns = _hookMap[stateKeys[i]] || [];
 			fns.push(hook);
-			_hookMap[storeKeys[i]] = fns;
+			_hookMap[stateKeys[i]] = fns;
 		}
 	},
 
-	removeStoreListener : function(storeKeys,hook){
-		for(var i in storeKeys){
-			var hooks = _hookMap[storeKeys[i]];
+	removeStateListener : function(stateKeys,hook){
+		for(var i in stateKeys){
+			var hooks = _hookMap[stateKeys[i]];
 			for(var j in hooks){
 				if(hooks[j] === hook){
 					hooks.splice(j,1);
 				}
 			}
-			_hookMap[storeKeys[i]] = hooks;
+			_hookMap[stateKeys[i]] = hooks;
 		}
 	},
 
-	initStore : function(store){
-		_store = store;
-	},
-
-	getStore : function(key){
-		if(key){
-			return _store[key];
+	printStateTree : function(stateKey){
+		if(stateKey){
+			console.log(_stateTree[stateKey]);
 		}else{
-			return _store;
+			console.log(_stateTree);
 		}
 	},
 
-	setStore : function(key, val){
-		//1.更新store的值
-		_store[key] = val;
-		//2.触发监听该store的组件钩子函数
-		var hooks = _hookMap[key];
-		for(var i=0,len=hooks.length; i<len; i++){
-			hooks[i]();
+	printStateListener : function(stateKey){
+		if(stateKey){
+			_showListener(stateKey);
+		}else{
+			for(var key in _hookMap){
+				_showListener(key);
+			}
 		}
-		//3.debug
-		_tools.showHooks(key,hooks);
 	},
+
 };

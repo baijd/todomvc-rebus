@@ -20,6 +20,7 @@ var CompFactory = {
 			id={arg.id}
 			className={arg.className}
 			placeholder={arg.placeholder}
+			value={arg.value}
 			onSave={arg.onSave} />;
 	},
 	createTodoBody : function(arg){

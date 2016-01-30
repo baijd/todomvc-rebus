@@ -23,11 +23,11 @@ module.exports = React.createClass({
 		return _createState();
 	},
 	componentDidMount : function(){
-		this.updateTodoFilter.hookey = 'updateTodoFilter';
-		Rebus.addStoreListener(['filter'], this.updateTodoFilter);
+		this.updateTodoFilter.listener = _FILE;
+		Rebus.addStateListener(['filter'], this.updateTodoFilter);
 	},
 	componentWillUnmount : function(){
-		Rebus.removeStoreListener(['filter'], this.updateTodoFilter);
+		Rebus.removeStateListener(['filter'], this.updateTodoFilter);
 	},
 	render : function(){
 		return (

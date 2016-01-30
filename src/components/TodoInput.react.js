@@ -1,18 +1,10 @@
 var React = require('react'),
-	ReactPropTypes = React.PropTypes,
 	Rebus = require('../utils/Rebus.js');
 
 var _FILE = 'TodoInput.react.js',
 	ENTER_KEY_CODE = 13;
 
-var TodoInput = React.createClass({
-
-	propTypes : {
-		className : ReactPropTypes.string,
-		id: ReactPropTypes.string,
-		placeholder: ReactPropTypes.string,
-		value: ReactPropTypes.string
-	},
+module.exports = React.createClass({
 
 	getInitialState : function(){
 		return {
@@ -25,7 +17,7 @@ var TodoInput = React.createClass({
 		return (
 			<input
 				className={this.props.className}
-				id={this.props.id}
+				id='new-todo'
 				placeholder={this.props.placeholder}
 				autoFocus={true}
 				value={this.state.value}
@@ -47,9 +39,9 @@ var TodoInput = React.createClass({
 	},
 
 	onSave : function(text){
-		Rebus.execute({akey:'ADD_TODO',from:_FILE}, {text:text});
+		var actionHead = {akey:'ADD_TODO',from:_FILE};
+		Rebus.execute(actionHead, {text:text});
 		this.setState({value : ''});
 	},
-});
 
-module.exports = TodoInput;
+});

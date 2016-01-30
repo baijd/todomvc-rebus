@@ -16,11 +16,11 @@ var TodoFoot = React.createClass({
 		return _createState();
 	},
 	componentDidMount : function(){
-		this.updateTodoFoot.hookey = 'updateTodoFoot';
-		Rebus.addStoreListener(['todos'], this.updateTodoFoot);
+		this.updateTodoFoot.listener = _FILE;
+		Rebus.addStateListener(['todos'], this.updateTodoFoot);
 	},
 	componentWillUnmount : function(){
-		Rebus.removeStoreListener(['todos'], this.updateTodoFoot);
+		Rebus.removeStateListener(['todos'], this.updateTodoFoot);
 	},
 	render : function(){
 		var allTodos = this.state.allTodos;

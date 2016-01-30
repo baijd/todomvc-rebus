@@ -13,19 +13,24 @@ var _createState = function(){
 	}
 }//End getTodoState
 
-var TodoBody = React.createClass({
+module.exports = React.createClass({
+
+	//监听State的钩子函数
+	updateTodoBody : function(){
+		this.setState(_createState());
+	},//End updateTodoBody
 
 	getInitialState : function(){
 		return _createState();
 	},//End getInitialState
 
 	componentDidMount : function(){
-		this.updateTodoBody.hookey = 'updateTodoBody';
-		Rebus.addStoreListener(['todos','filter'], this.updateTodoBody);
+		this.updateTodoBody.listener = _FILE;
+		Rebus.addStateListener(['todos','filter'], this.updateTodoBody);
 	},//End componentDidMount
 
 	componentWillUnmount : function(){
-		Rebus.removeStoreListener(['todos','filter'], this.updateTodoBody);
+		Rebus.removeStateListener(['todos','filter'], this.updateTodoBody);
 	},//End componentWillUnmount
 
 	render : function(){
@@ -50,10 +55,4 @@ var TodoBody = React.createClass({
 		Rebus.execute({akey:'TOGGLE_ALL_COMPLETE',from:_FILE});
 	},//End onToggleCompleteAll
 
-	updateTodoBody : function(){
-		this.setState(_createState);
-	},//End updateTodoBody
-
 });
-
-module.exports = TodoBody;

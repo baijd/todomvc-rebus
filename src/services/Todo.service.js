@@ -1,45 +1,63 @@
 var assign = require('object-assign'),
 	Rebus = require('../utils/Rebus.js');
 
+//AOP(切面编程)
+function updateTodos(operate){
+	var todos = Rebus.getState('todos');
+	operate(todos);
+	Rebus.setState('todos',todos);
+}
+
 function add(arg){
-	var todos = Rebus.getStore('todos');
-	var text = arg.text;
-	if(text!==''){
-		var id = (+new Date() + Math.floor(Math.random()*999999).toString(36));
-		todos[id] = {
-			id		: id,
-			complete: false,
-			text 	: text
-		};
-	}
-	Rebus.setStore('todos',todos);//更新Store，触发监听该Store的组件刷新
+	updateTodos(function(todos){
+		var text = arg.text;
+		if(text!==''){
+			var id = (+new Date() + Math.floor(Math.random()*999999).toString(36));
+			todos[id] = {
+				id		: id,
+				complete: false,
+				text 	: text
+			};
+		}
+	});//End updateTodos
 }//End add
 
 function remove(todoID){
-	var todos = Rebus.getStore('todos');
-	delete todos[todoID];
-	Rebus.setStore('todos',todos);
+	updateTodos(function(todos){
+		delete todos[todoID];
+	});
 };//End remove
 
 function toggleComplete(todo){
-	var todos = Rebus.getStore('todos');
-	todo.complete = !todo.complete;
-	todos[todo.id] = todo;
-	Rebus.setStore('todos',todos);
+	updateTodos(function(todos){
+		todo.complete = !todo.complete;
+		todos[todo.id] = todo;
+	});
 };//End toggleComplete
 
 function update(id, updates){
-	var todos = Rebus.getStore('todos');
-	todos[id] = assign({}, todos[id], updates);
-	Rebus.setStore('todos',todos);
+	updateTodos(function(todos){
+		todos[id] = assign({}, todos[id], updates);
+	});
 }//End update
 
+function clearCompleted(){
+	updateTodos(function(todos){
+		for(var id in todos){
+			if(todos[id].complete){
+				delete todos[id];
+			}
+		}
+		setFilter(0);
+	});
+}//End clearCompleted
+
 function getAllTodos(){
-	return Rebus.getStore('todos');
+	return Rebus.getState('todos');
 }//End getAllTodos
 
 function getTodosByFilter(){
-	switch(Rebus.getStore('filter')){
+	switch(Rebus.getState('filter')){
 	case 0:
 		return getAllTodos();
 		break;
@@ -56,7 +74,7 @@ function getTodosByFilter(){
 
 function getCompleteds(){
 	var completeds = {};
-	var todos = Rebus.getStore('todos');
+	var todos = Rebus.getState('todos');
 	for(var id in todos){
 		if(todos[id].complete){
 			completeds[id] = todos[id];
@@ -67,7 +85,7 @@ function getCompleteds(){
 
 function getLeftItems(){
 	var leftItems = {};
-	var todos = Rebus.getStore('todos');
+	var todos = Rebus.getState('todos');
 	for(var id in todos){
 		if(!todos[id].complete){
 			leftItems[id] = todos[id];
@@ -78,7 +96,7 @@ function getLeftItems(){
 
 function areAllComplete(){
 	var propCount = 0;
-	var todos = Rebus.getStore('todos');
+	var todos = Rebus.getState('todos');
 	for(var id in todos){
 		propCount++;
 		if(!todos[id].complete){
@@ -93,34 +111,20 @@ function areAllComplete(){
 
 function toggleAllComplete(){
 	var allCompleted = areAllComplete();
-	var todos = Rebus.getStore('todos');
+	var todos = Rebus.getState('todos');
 	for(var i in todos){
 		todos[i].complete = !allCompleted;
 	}
-	Rebus.setStore('todos',todos);
+	Rebus.setState('todos',todos);
 }//End toggleAllComplete
 
-function clearCompleted(){
-	var todos = Rebus.getStore('todos');
-	for(var id in todos){
-		if(todos[id].complete){
-			delete todos[id];
-		}
-	}
-	Rebus.setStore('todos',todos);
-}//End clearCompleted
-
 function getFilter(){
-	return Rebus.getStore('filter');
+	return Rebus.getState('filter');
 }//End getFilter
 
 function setFilter(filter){
-	Rebus.setStore('filter',filter);
+	Rebus.setState('filter',filter);
 }//End setFilter
-
-function logAddAction(){
-	console.log('You have added a new Todo item: '+arguments[1].text);
-}
 
 module.exports = {
 	add 		: add,
@@ -134,5 +138,4 @@ module.exports = {
 	getTodosByFilter	: getTodosByFilter,
 	getFilter 			: getFilter,
 	setFilter			: setFilter,
-	logAddAction		: logAddAction,
 };
