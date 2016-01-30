@@ -1,5 +1,5 @@
 # todomvc-rebus
-一个简单的，基于消息的，单向的，ReactJs框架。
+一个基于消息机制的，单向数据流的，ReactJs的开发框架
 
 安装：
 npm install
